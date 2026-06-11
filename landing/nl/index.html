@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StackAlert — CVE-alerts voor jouw stack. Niets anders.</title>
+<meta name="description" content="Eén korte digest met alleen de CVE's die de producten raken die je echt gebruikt — geprioriteerd via CISA KEV en EPSS. Gemaakt voor kleine IT-teams en MSP's.">
+<link rel="stylesheet" href="../style.css">
+<link rel="alternate" hreflang="en" href="/">
+<link rel="alternate" hreflang="fr" href="/fr/">
+<link rel="alternate" hreflang="nl" href="/nl/">
+<link rel="alternate" hreflang="de" href="/de/">
+<link rel="alternate" hreflang="es" href="/es/">
+<link rel="alternate" hreflang="x-default" href="/">
+</head>
+<body>
+<div class="wrap">
+  <nav class="lang"><a href="/">EN</a><a href="/fr/">FR</a><a class="active" href="/nl/">NL</a><a href="/de/">DE</a><a href="/es/">ES</a></nav>
+
+  <header>
+    <div class="logo">StackAlert</div>
+    <h1>CVE-alerts voor <em>jouw stack</em>.<br>Niets anders.</h1>
+    <p class="sub">Geef op welke producten je gebruikt. Ontvang één korte digest
+    — alleen de kwetsbaarheden die jouw omgeving echt raken, gerangschikt op
+    werkelijke uitbuiting (CISA KEV + EPSS), elk met één concrete actie.</p>
+  </header>
+
+  <section>
+    <div class="pain">
+      <div class="card"><b>Honderden CVE's per week gepubliceerd.</b>
+        <span>Misschien vijf raken jouw software. Veel succes om ze te vinden in een ruwe feed.</span></div>
+      <div class="card"><b>Generieke alertmails zijn ruis.</b>
+        <span>Ongefilterde feeds worden vluchtig gelezen en daarna genegeerd — tot die ene die ertoe deed.</span></div>
+      <div class="card"><b>Threat-intelplatformen zijn geprijsd voor enterprises.</b>
+        <span>Kleine IT-teams en MSP's blijven handmatig checken, "als er tijd is".</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Hoe het werkt</h2>
+    <div class="steps">
+      <div class="card"><span class="step-n">1</span><b>Geef je stack op</b>
+        <span> — leveranciers en producten, per klant als je een MSP bent. Twee minuten, geen agent te installeren.</span></div>
+      <div class="card"><span class="step-n">2</span><b>Wij volgen de bronnen voor jou</b>
+        <span> — NVD, OSV, CISA KEV en EPSS, meerdere keren per dag gekruist.</span></div>
+      <div class="card"><span class="step-n">3</span><b>Eén digest, alleen wat telt</b>
+        <span> — dagelijks of wekelijks, via e-mail of Slack. Actief uitgebuite kwetsbaarheden eerst.</span></div>
+    </div>
+  </section>
+
+  <section id="waitlist">
+    <h2>Vroege toegang</h2>
+    <form name="waitlist" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="waitlist">
+      <input type="hidden" name="lang" value="nl">
+      <p class="hidden"><label>Niet invullen: <input name="bot-field"></label></p>
+
+      <label for="email">Werkmail *</label>
+      <input id="email" type="email" name="email" required placeholder="jij@bedrijf.be" autocomplete="email">
+
+      <label for="stack">Wat zit er in je stack? <span class="opt">(optioneel, maar het helpt ons prioriteren)</span></label>
+      <textarea id="stack" name="stack" rows="3" placeholder="bv. FortiGate, VMware ESXi, Windows Server, Ubuntu, Cisco IOS, Veeam…"></textarea>
+
+      <label for="role">Je rol <span class="opt">(optioneel)</span></label>
+      <input id="role" type="text" name="role" placeholder="bv. sysadmin bij een kmo met 80 werkplekken / MSP-technicus">
+
+      <button type="submit">Zet me op de wachtlijst</button>
+      <p class="tiny">Gratis tijdens de beta. Early-bird-prijs voor de wachtlijst. Geen spam — een handvol mails in totaal.</p>
+    </form>
+  </section>
+
+  <section class="faq">
+    <h2>FAQ</h2>
+    <b>Doen de gratis CISA-mails dit niet al?</b>
+    <p>De CISA-alerts zijn prima — en ongefilterd. Je moet alles lezen om te vinden wat jou aangaat. Wij sturen alleen wat overeenkomt met de stack die je opgaf.</p>
+    <b>Hoe wordt er geprioriteerd?</b>
+    <p>Eerst CISA KEV (bewezen uitbuiting), dan EPSS (kans op uitbuiting), dan CVSS. Een severity-score alleen is een slecht triagesignaal.</p>
+    <b>Wat gaat het kosten?</b>
+    <p>Een gratis laag (één product, wekelijkse digest), en betaalde plannen rond de prijs van één koffie per week voor onbeperkte stacks en dagelijkse alerts. Wachtlijst krijgt early-bird-prijzen.</p>
+  </section>
+
+  <footer>
+    StackAlert — onafhankelijk project, gebouwd door een infrastructuurbeheerder.
+    Bronnen: NVD, OSV.dev, CISA KEV, FIRST EPSS.
+  </footer>
+
+</div>
+</body>
+</html>
