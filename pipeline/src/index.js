@@ -16,6 +16,10 @@
  * lots), gérer la pagination NVD > 1 page, retry/backoff sur 503 NVD.
  */
 
+import { runNotify, resendTransport } from "./notify.js";
+import { matchStack } from "./match.js";
+import { sortForDigest } from "./digest.js";
+
 const NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0";
 const KEV_URL =
   "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json";
@@ -43,12 +47,16 @@ export default {
     ctx.waitUntil(runIngestion(env));
   },
 
-  // Endpoint manuel pour tester sans attendre le cron : GET /run
+  // GET /run : ingestion manuelle (test sans attendre le cron)
+  // GET /api/matches?stack=vendor:product[:version],… : CVE matchées (30 j)
   async fetch(req, env) {
     const url = new URL(req.url);
     if (url.pathname === "/run") {
       await runIngestion(env);
       return new Response("ingestion done\n");
+    }
+    if (url.pathname === "/api/matches") {
+      return apiMatches(url, env);
     }
     return new Response("stackalert-ingest\n");
   },
@@ -59,6 +67,74 @@ async function runIngestion(env) {
   const newCveIds = await syncNvd(env);
   await syncEpss(env, newCveIds);
   await markKev(env, kevIds);
+  // Envoi des digests — silencieusement sauté tant que RESEND_API_KEY n'est
+  // pas configurée (beta-safe : l'ingestion tourne sans le mailing).
+  if (env.RESEND_API_KEY) {
+    const transport = resendTransport(
+      env.RESEND_API_KEY,
+      env.DIGEST_FROM ?? "StackAlert <digest@example.invalid>"
+    );
+    const r = await runNotify(env, transport);
+    if (r.sent || r.failed) console.log(`notify: ${r.sent} envoyés, ${r.failed} échecs`);
+  }
+}
+
+/**
+ * API de matching pour la future UI (et les démos curl) :
+ *   /api/matches?stack=fortinet:fortios:7.2.1,vmware:esxi
+ * Borné à 30 jours / 2000 lignes / 50 résultats pour rester sous la limite
+ * CPU du free tier. CORS ouvert : lecture seule, données publiques.
+ */
+async function apiMatches(url, env) {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  };
+  const stackArg = url.searchParams.get("stack") ?? "";
+  const stack = stackArg
+    .split(",")
+    .map((s) => {
+      const [vendor, product, version] = s.trim().split(":");
+      return { vendor, product, version: version || undefined };
+    })
+    .filter((s) => s.vendor && s.product);
+  if (stack.length === 0) {
+    return new Response(JSON.stringify({ error: "stack parameter required" }), {
+      status: 400,
+      headers,
+    });
+  }
+
+  const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  const rows =
+    (
+      await env.DB.prepare(
+        `SELECT id, cvss_score, in_kev, epss_score, description, cpe_json FROM cves
+         WHERE last_modified > ?1 ORDER BY last_modified DESC LIMIT 2000`
+      )
+        .bind(since)
+        .all()
+    ).results ?? [];
+
+  const matches = [];
+  for (const r of rows) {
+    const hits = matchStack(stack, JSON.parse(r.cpe_json || "[]"));
+    if (hits.length === 0) continue;
+    matches.push({
+      id: r.id,
+      cvss_score: r.cvss_score,
+      in_kev: r.in_kev,
+      epss_score: r.epss_score,
+      description: (r.description ?? "").slice(0, 300),
+      matched: hits.map((h) => ({ display: `${h.vendor}/${h.product}` })),
+    });
+  }
+  const body = {
+    window_days: 30,
+    scanned: rows.length,
+    matches: sortForDigest(matches).slice(0, 50),
+  };
+  return new Response(JSON.stringify(body), { headers });
 }
 
 /** NVD : CVE modifiées depuis le curseur stocké (max 120 jours d'écart). */

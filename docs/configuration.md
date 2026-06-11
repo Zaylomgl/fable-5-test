@@ -89,6 +89,34 @@ Comportement attendu : le premier run ne remonte que **7 jours** d'historique
 curseur de sync est en table `sync_state` : si un run est interrompu, le
 suivant reprend la même fenêtre sans rien perdre (upserts idempotents).
 
+**Tester l'API de matching** (alimente la future UI, utile aussi en démo) :
+
+```bash
+curl "https://stackalert-ingest.<ton-sous-domaine>.workers.dev/api/matches?stack=fortinet:fortios,vmware:esxi"
+# → JSON : CVE des 30 derniers jours touchant cette stack, triées KEV>EPSS>CVSS
+```
+
+**Activer l'envoi des digests (beta)** — optionnel, l'ingestion tourne sans :
+
+```bash
+# 1. Compte resend.com (gratuit : 3 000 emails/mois, 100/jour) + domaine vérifié
+wrangler secret put RESEND_API_KEY
+# 2. Expéditeur (sinon un placeholder invalide est utilisé) : dans wrangler.toml
+#    [vars]  DIGEST_FROM = "StackAlert <digest@ton-domaine.com>"
+
+# 3. Ajouter un abonné beta à la main ("do things that don't scale") :
+wrangler d1 execute stackalert --remote --command "
+INSERT INTO subscribers (email, frequency) VALUES ('toi@exemple.com','daily');
+INSERT INTO subscriber_products (subscriber_id, vendor, product) VALUES
+  (1,'fortinet','fortios'),(1,'vmware','esxi'),(1,'microsoft','exchange_server');"
+```
+
+Comportement : digest quotidien au run cron de ~06:15 UTC, hebdo le lundi même
+créneau ; **digest vide = pas d'email** (le silence est la promesse du
+produit) ; une CVE n'est jamais renvoyée deux fois au même abonné
+(`sent_log`) ; si un envoi échoue, le run suivant retente sans doublonner.
+Commence par t'abonner toi-même une semaine avant d'ouvrir aux beta-testeurs.
+
 **Si le worker dépasse la limite CPU du plan gratuit (~10 ms/invocation)** —
 visible dans `wrangler tail` ou le dashboard : plan B documenté dans
 `src/index.js` → exécuter la même logique dans un cron GitHub Actions
