@@ -1,0 +1,5 @@
+# Landing statique uniquement : pas de build (0 minute consommée),
+# publication du dossier landing/.
+[build]
+  publish = "landing"
+  command = "true"
