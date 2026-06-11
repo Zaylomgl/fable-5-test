@@ -21,6 +21,22 @@ const KEV_URL =
   "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json";
 const EPSS_API = "https://api.first.org/data/v1/epss";
 const NVD_PAGE_SIZE = 200; // pages volontairement petites (budget CPU)
+const NVD_MAX_PAGES_PER_RUN = 3; // ~18 s de wall time max (6 s entre pages)
+const NVD_PAGE_DELAY_MS = 6000; // cadence recommandée par la NVD
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** fetch avec retry/backoff — la NVD renvoie 403/503 en cas de surcharge. */
+async function fetchWithRetry(url, opts = {}, tries = 3) {
+  let res;
+  for (let i = 0; i < tries; i++) {
+    res = await fetch(url, opts);
+    if (res.ok) return res;
+    if (![403, 429, 503].includes(res.status) || i === tries - 1) break;
+    await sleep(2000 * 2 ** i);
+  }
+  throw new Error(`${String(url).split("?")[0]} -> HTTP ${res.status}`);
+}
 
 export default {
   async scheduled(event, env, ctx) {
@@ -56,56 +72,73 @@ async function syncNvd(env) {
   const since =
     row?.cursor ?? new Date(Date.now() - 7 * 864e5).toISOString();
 
-  const params = new URLSearchParams({
-    lastModStartDate: since,
-    lastModEndDate: now,
-    resultsPerPage: String(NVD_PAGE_SIZE),
-  });
   const headers = env.NVD_API_KEY ? { apiKey: env.NVD_API_KEY } : {};
-  const res = await fetch(`${NVD_API}?${params}`, { headers });
-  if (!res.ok) throw new Error(`NVD ${res.status}`);
-  const data = await res.json();
-
   const ids = [];
-  for (const item of data.vulnerabilities ?? []) {
-    const c = item.cve;
-    const metric =
-      c.metrics?.cvssMetricV31?.[0]?.cvssData ??
-      c.metrics?.cvssMetricV40?.[0]?.cvssData;
-    await env.DB.prepare(
-      `INSERT INTO cves (id, published, last_modified, cvss_score, cvss_severity, description, cpe_json)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
-       ON CONFLICT(id) DO UPDATE SET
-         last_modified=?3, cvss_score=?4, cvss_severity=?5, description=?6, cpe_json=?7`
-    )
-      .bind(
-        c.id,
-        c.published,
-        c.lastModified,
-        metric?.baseScore ?? null,
-        metric?.baseSeverity ?? null,
-        c.descriptions?.find((d) => d.lang === "en")?.value ?? "",
-        JSON.stringify(c.configurations ?? [])
-      )
-      .run();
-    ids.push(c.id);
-  }
-  // TODO: si data.totalResults > NVD_PAGE_SIZE, boucler avec startIndex
-  // (en respectant ~6 s entre requêtes recommandés par la NVD).
+  let startIndex = 0;
+  let complete = false;
 
-  await env.DB.prepare(
-    `INSERT INTO sync_state (source, cursor, updated_at) VALUES ('nvd', ?1, ?1)
-     ON CONFLICT(source) DO UPDATE SET cursor=?1, updated_at=?1`
-  )
-    .bind(now)
-    .run();
+  for (let page = 0; page < NVD_MAX_PAGES_PER_RUN; page++) {
+    const params = new URLSearchParams({
+      lastModStartDate: since,
+      lastModEndDate: now,
+      resultsPerPage: String(NVD_PAGE_SIZE),
+      startIndex: String(startIndex),
+    });
+    const res = await fetchWithRetry(`${NVD_API}?${params}`, { headers });
+    const data = await res.json();
+
+    for (const item of data.vulnerabilities ?? []) {
+      await upsertCve(env, item.cve);
+      ids.push(item.cve.id);
+    }
+
+    startIndex += data.vulnerabilities?.length ?? 0;
+    if (startIndex >= (data.totalResults ?? 0)) {
+      complete = true;
+      break;
+    }
+    await sleep(NVD_PAGE_DELAY_MS); // cadence NVD entre deux pages
+  }
+
+  // Curseur avancé seulement si la fenêtre est entièrement traitée. Sinon le
+  // prochain run reprend la même fenêtre — les upserts sont idempotents, on
+  // retraite sans risque plutôt que de perdre des CVE.
+  if (complete) {
+    await env.DB.prepare(
+      `INSERT INTO sync_state (source, cursor, updated_at) VALUES ('nvd', ?1, ?1)
+       ON CONFLICT(source) DO UPDATE SET cursor=?1, updated_at=?1`
+    )
+      .bind(now)
+      .run();
+  }
   return ids;
+}
+
+async function upsertCve(env, c) {
+  const metric =
+    c.metrics?.cvssMetricV31?.[0]?.cvssData ??
+    c.metrics?.cvssMetricV40?.[0]?.cvssData;
+  await env.DB.prepare(
+    `INSERT INTO cves (id, published, last_modified, cvss_score, cvss_severity, description, cpe_json)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+     ON CONFLICT(id) DO UPDATE SET
+       last_modified=?3, cvss_score=?4, cvss_severity=?5, description=?6, cpe_json=?7`
+  )
+    .bind(
+      c.id,
+      c.published,
+      c.lastModified,
+      metric?.baseScore ?? null,
+      metric?.baseSeverity ?? null,
+      c.descriptions?.find((d) => d.lang === "en")?.value ?? "",
+      JSON.stringify(c.configurations ?? [])
+    )
+    .run();
 }
 
 /** KEV : le catalogue complet est petit, on le relit en entier. */
 async function syncKev(env) {
-  const res = await fetch(KEV_URL);
-  if (!res.ok) throw new Error(`KEV ${res.status}`);
+  const res = await fetchWithRetry(KEV_URL);
   const data = await res.json();
   return (data.vulnerabilities ?? []).map((v) => ({
     id: v.cveID,

@@ -11,8 +11,9 @@ priorisé KEV/EPSS/CVSS, uniquement pour les produits que tu utilises vraiment.
 | Dossier | Rôle | Semaine roadmap |
 |---|---|---|
 | `docs/positionnement.md` | Doc de positionnement 1 page + critères go/no-go | S1 |
+| `docs/configuration.md` | **Guide de config pas-à-pas (Netlify, Cloudflare, NVD, quotas)** | — |
 | `landing/` | Landing de validation statique (waitlist, 0 build minute) | S2 |
-| `pipeline/` | Squelette d'ingestion NVD/KEV/EPSS → Cloudflare D1 | S4 (préparé en avance) |
+| `pipeline/` | Ingestion NVD/KEV/EPSS → D1 + moteur de matching + digests (testés) | S4–S6 |
 
 ## Déployer la landing (0 €)
 
