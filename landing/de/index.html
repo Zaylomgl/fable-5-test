@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StackAlert — CVE-Alerts für deinen Stack. Sonst nichts.</title>
+<meta name="description" content="Ein kurzer Digest mit nur den CVEs, die die Produkte betreffen, die du wirklich einsetzt — priorisiert nach CISA KEV und EPSS. Gebaut für kleine IT-Teams und MSPs.">
+<link rel="stylesheet" href="../style.css">
+<link rel="alternate" hreflang="en" href="/">
+<link rel="alternate" hreflang="fr" href="/fr/">
+<link rel="alternate" hreflang="nl" href="/nl/">
+<link rel="alternate" hreflang="de" href="/de/">
+<link rel="alternate" hreflang="es" href="/es/">
+<link rel="alternate" hreflang="x-default" href="/">
+</head>
+<body>
+<div class="wrap">
+  <nav class="lang"><a href="/">EN</a><a href="/fr/">FR</a><a href="/nl/">NL</a><a class="active" href="/de/">DE</a><a href="/es/">ES</a></nav>
+
+  <header>
+    <div class="logo">StackAlert</div>
+    <h1>CVE-Alerts für <em>deinen Stack</em>.<br>Sonst nichts.</h1>
+    <p class="sub">Gib an, welche Produkte du einsetzt. Erhalte einen kurzen
+    Digest — nur die Schwachstellen, die deine Umgebung wirklich betreffen,
+    sortiert nach realer Ausnutzung (CISA KEV + EPSS), jede mit einer konkreten
+    Handlungsempfehlung.</p>
+  </header>
+
+  <section>
+    <div class="pain">
+      <div class="card"><b>Hunderte CVEs werden jede Woche veröffentlicht.</b>
+        <span>Vielleicht fünf betreffen deine Software. Viel Glück, sie in einem Roh-Feed zu finden.</span></div>
+      <div class="card"><b>Generische Alert-Mails sind Rauschen.</b>
+        <span>Ungefilterte Feeds werden überflogen, dann ignoriert — bis zu dem einen, der zählte.</span></div>
+      <div class="card"><b>Threat-Intel-Plattformen sind für Konzerne bepreist.</b>
+        <span>Kleinen IT-Teams und MSPs bleibt das manuelle Prüfen, „wenn Zeit ist".</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>So funktioniert's</h2>
+    <div class="steps">
+      <div class="card"><span class="step-n">1</span><b>Stack angeben</b>
+        <span> — Hersteller und Produkte, pro Kunde wenn du ein MSP bist. Zwei Minuten, kein Agent nötig.</span></div>
+      <div class="card"><span class="step-n">2</span><b>Wir beobachten die Quellen für dich</b>
+        <span> — NVD, OSV, CISA KEV und EPSS, mehrmals täglich abgeglichen.</span></div>
+      <div class="card"><span class="step-n">3</span><b>Ein Digest, nur das Relevante</b>
+        <span> — täglich oder wöchentlich, per E-Mail oder Slack. Aktiv ausgenutzte Lücken zuerst.</span></div>
+    </div>
+  </section>
+
+  <section id="waitlist">
+    <h2>Früher Zugang</h2>
+    <form name="waitlist" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="waitlist">
+      <input type="hidden" name="lang" value="de">
+      <p class="hidden"><label>Nicht ausfüllen: <input name="bot-field"></label></p>
+
+      <label for="email">Geschäftliche E-Mail *</label>
+      <input id="email" type="email" name="email" required placeholder="du@firma.de" autocomplete="email">
+
+      <label for="stack">Was steckt in deinem Stack? <span class="opt">(optional, hilft uns beim Priorisieren)</span></label>
+      <textarea id="stack" name="stack" rows="3" placeholder="z. B. FortiGate, VMware ESXi, Windows Server, Ubuntu, Cisco IOS, Veeam…"></textarea>
+
+      <label for="role">Deine Rolle <span class="opt">(optional)</span></label>
+      <input id="role" type="text" name="role" placeholder="z. B. Sysadmin in einem 80-Seat-Betrieb / MSP-Techniker">
+
+      <button type="submit">Auf die Warteliste</button>
+      <p class="tiny">Kostenlos während der Beta. Early-Bird-Preise für die Warteliste. Kein Spam — insgesamt nur eine Handvoll Mails.</p>
+    </form>
+  </section>
+
+  <section class="faq">
+    <h2>FAQ</h2>
+    <b>Machen die kostenlosen CISA-Mails das nicht schon?</b>
+    <p>Die CISA-Alerts sind gut — und ungefiltert. Du musst alles lesen, um zu finden, was dich betrifft. Wir schicken nur, was zu deinem angegebenen Stack passt.</p>
+    <b>Wie wird priorisiert?</b>
+    <p>Zuerst CISA KEV (nachweislich ausgenutzt), dann EPSS (Ausnutzungswahrscheinlichkeit), dann CVSS. Der Schweregrad allein ist ein schlechtes Triage-Signal.</p>
+    <b>Was wird es kosten?</b>
+    <p>Eine kostenlose Stufe (ein Produkt, wöchentlicher Digest) und Bezahlpläne etwa zum Preis eines Kaffees pro Woche für unbegrenzte Stacks und tägliche Alerts. Warteliste erhält Early-Bird-Preise.</p>
+  </section>
+
+  <footer>
+    StackAlert — unabhängiges Projekt, gebaut von einem Infrastruktur-Admin.
+    Quellen: NVD, OSV.dev, CISA KEV, FIRST EPSS.
+  </footer>
+
+</div>
+</body>
+</html>
