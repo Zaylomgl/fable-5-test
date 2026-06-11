@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack check — StackAlert</title>
+<meta name="description" content="Paste your stack, see the CVEs from the last 30 days that actually concern it — prioritized by real-world exploitation.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .result{margin-top:10px}
+  .cve{border-left:4px solid var(--accent);padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px}
+  .cve.kev{border-left-color:#dc2626}
+  .cve small{color:var(--muted);display:block}
+  .cve a{color:var(--accent2)}
+  .muted{color:var(--muted)}
+  .err{color:#f87171}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><a href="/" style="color:inherit;text-decoration:none">StackAlert</a></div>
+    <h1>Check <em>your stack</em> now</h1>
+    <p class="sub">CVEs from the last 30 days that match the products below,
+    ranked by real-world exploitation (CISA KEV + EPSS). No signup needed.</p>
+  </header>
+
+  <section>
+    <form id="checkForm">
+      <label for="stack">Your products — one <code>vendor:product[:version]</code> per line (CPE-style, lowercase)</label>
+      <textarea id="stack" rows="5" spellcheck="false">fortinet:fortios
+vmware:esxi
+microsoft:exchange_server</textarea>
+      <button type="submit">Check my stack</button>
+      <p class="tiny">Read-only, nothing stored. Powered by NVD, CISA KEV and EPSS data.</p>
+    </form>
+    <div id="out" class="result" aria-live="polite"></div>
+  </section>
+
+  <section style="text-align:center">
+    <p class="muted">Want this in your inbox automatically, only when it matters?</p>
+    <p><a href="/#waitlist" style="color:var(--accent)">Join the waitlist →</a></p>
+  </section>
+
+  <footer>StackAlert — data: NVD, OSV.dev, CISA KEV, FIRST EPSS.</footer>
+</div>
+
+<script>
+// Renseigner l'URL du worker après `wrangler deploy` (partie B de la doc),
+// ou surcharger à la volée : check.html?api=https://...workers.dev
+const API_BASE = new URLSearchParams(location.search).get("api")
+  || "https://REPLACE-ME.workers.dev";
+
+const out = document.getElementById("out");
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+document.getElementById("checkForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const stack = document.getElementById("stack").value
+    .split("\n").map((l) => l.trim()).filter(Boolean).join(",");
+  if (!stack) return;
+  out.innerHTML = '<p class="muted">Checking…</p>';
+  try {
+    const res = await fetch(`${API_BASE}/api/matches?stack=${encodeURIComponent(stack)}`);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+    render(data);
+  } catch (err) {
+    out.innerHTML = `<p class="err">Could not reach the API (${esc(err.message)}).
+      The beta backend may be down — try again later or
+      <a href="/#waitlist">join the waitlist</a>.</p>`;
+  }
+});
+
+function render(data) {
+  const m = data.matches ?? [];
+  if (m.length === 0) {
+    out.innerHTML = `<p class="muted">✅ Nothing in the last ${data.window_days} days
+      matches this stack (${data.scanned} CVEs scanned). Enjoy the quiet —
+      and <a href="/#waitlist">get notified when that changes</a>.</p>`;
+    return;
+  }
+  const kev = m.filter((c) => c.in_kev).length;
+  out.innerHTML =
+    `<p><b>${m.length}</b> matching CVE${m.length > 1 ? "s" : ""} in the last
+     ${data.window_days} days${kev ? ` — <b style="color:#f87171">${kev} actively exploited</b>` : ""}
+     <span class="muted">(${data.scanned} scanned)</span></p>` +
+    m.map((c) => `
+      <div class="cve${c.in_kev ? " kev" : ""}">
+        <b>${esc(c.id)}</b> — ${esc(c.matched.map((x) => x.display).join(", "))}
+        <small>${c.in_kev ? "EXPLOITED IN THE WILD · " : ""}${
+          c.epss_score != null ? `EPSS ${(c.epss_score * 100).toFixed(1)}% · ` : ""
+        }${c.cvss_score != null ? `CVSS ${c.cvss_score}` : ""}</small>
+        <small>${esc(c.description ?? "")}</small>
+        <small><a href="https://nvd.nist.gov/vuln/detail/${esc(c.id)}" rel="noopener">NVD details →</a></small>
+      </div>`).join("");
+}
+</script>
+</body>
+</html>
