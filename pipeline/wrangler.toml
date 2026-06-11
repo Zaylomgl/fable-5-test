@@ -1,0 +1,19 @@
+name = "stackalert-ingest"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# Free plan: 5 cron triggers max, ~10 ms CPU per invocation.
+# Every 6h is enough for a daily/weekly digest product; KEV checked hourly
+# would be a paid-tier luxury, not a launch requirement.
+[triggers]
+crons = ["15 */6 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "stackalert"
+# database_id: filled in after `wrangler d1 create stackalert`
+database_id = "REPLACE_ME"
+
+# Secrets (set with `wrangler secret put NVD_API_KEY`):
+#   NVD_API_KEY — free key, raises NVD rate limit from 5 to 50 req / 30s
+#                 https://nvd.nist.gov/developers/request-an-api-key

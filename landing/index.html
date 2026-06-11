@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StackAlert — CVE alerts for your stack. Nothing else.</title>
+<meta name="description" content="One short digest with only the CVEs that affect the products you actually run — prioritized by CISA KEV and EPSS. Built for small IT teams and MSPs.">
+<style>
+  :root{--bg:#0b1020;--card:#131a2e;--text:#e8ecf5;--muted:#9aa5bd;--accent:#4ade80;--accent2:#22d3ee;--border:#243049}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px}
+  header{padding:64px 0 40px;text-align:center}
+  .logo{font-weight:700;letter-spacing:.5px;color:var(--accent);font-size:14px;text-transform:uppercase}
+  h1{font-size:clamp(28px,6vw,44px);line-height:1.15;margin:16px 0}
+  h1 em{font-style:normal;color:var(--accent)}
+  .sub{color:var(--muted);font-size:18px;max-width:560px;margin:0 auto}
+  section{padding:28px 0}
+  h2{font-size:22px;margin-bottom:14px}
+  .pain,.steps{display:grid;gap:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+  .card b{color:var(--text)}
+  .card span{color:var(--muted)}
+  .step-n{color:var(--accent2);font-weight:700;margin-right:8px}
+  form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:8px 0}
+  label{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
+  input,textarea{width:100%;background:#0e1426;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-size:16px}
+  input:focus,textarea:focus{outline:2px solid var(--accent2);border-color:transparent}
+  button{margin-top:16px;width:100%;background:var(--accent);color:#06240f;border:0;border-radius:8px;padding:14px;font-size:17px;font-weight:700;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  .tiny{font-size:13px;color:var(--muted);margin-top:10px;text-align:center}
+  .faq p{color:var(--muted);margin-bottom:14px}
+  .faq b{color:var(--text);display:block}
+  footer{padding:32px 0 48px;color:var(--muted);font-size:13px;text-align:center;border-top:1px solid var(--border);margin-top:32px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">StackAlert</div>
+    <h1>CVE alerts for <em>your stack</em>.<br>Nothing else.</h1>
+    <p class="sub">Declare the products you run. Get one short digest — only the
+    vulnerabilities that actually hit your environment, ranked by real-world
+    exploitation (CISA KEV + EPSS), each with one action line.</p>
+  </header>
+
+  <section>
+    <div class="pain">
+      <div class="card"><b>Hundreds of CVEs are published every week.</b>
+        <span>Maybe five concern the software you actually run. Good luck spotting them in a raw feed.</span></div>
+      <div class="card"><b>Generic alert emails are noise.</b>
+        <span>Unfiltered feeds get skimmed, then ignored — right up until the one that mattered.</span></div>
+      <div class="card"><b>Threat-intel platforms are priced for enterprises.</b>
+        <span>Small IT teams and MSPs are left with manual checking "when there's time".</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="card"><span class="step-n">1</span><b>Declare your stack</b>
+        <span> — vendors and products, per client if you're an MSP. Two minutes, no agent to install.</span></div>
+      <div class="card"><span class="step-n">2</span><b>We watch the sources for you</b>
+        <span> — NVD, OSV, CISA KEV and EPSS, cross-checked several times a day.</span></div>
+      <div class="card"><span class="step-n">3</span><b>One digest, only what matters</b>
+        <span> — daily or weekly, by email or Slack. Actively-exploited issues flagged first.</span></div>
+    </div>
+  </section>
+
+  <section id="waitlist">
+    <h2>Get early access</h2>
+    <!-- Netlify Forms: detected automatically on deploy, submissions land in
+         the Netlify dashboard (Forms tab). Free and unlimited. -->
+    <form name="waitlist" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="waitlist">
+      <p class="hidden"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+      <label for="email">Work email *</label>
+      <input id="email" type="email" name="email" required placeholder="you@company.com" autocomplete="email">
+
+      <label for="stack">What's in your stack? <span style="color:#647">(optional, but it helps us prioritize)</span></label>
+      <textarea id="stack" name="stack" rows="3" placeholder="e.g. FortiGate, VMware ESXi, Windows Server, Ubuntu, Cisco IOS, Veeam…"></textarea>
+
+      <label for="role">Your role <span style="color:#647">(optional)</span></label>
+      <input id="role" type="text" name="role" placeholder="e.g. sysadmin at a 80-seat company / MSP tech">
+
+      <button type="submit">Join the waitlist</button>
+      <p class="tiny">Free during beta. Early-bird pricing for waitlist members. No spam — a handful of emails total.</p>
+    </form>
+  </section>
+
+  <section class="faq">
+    <h2>FAQ</h2>
+    <b>Isn't this what the free CISA emails do?</b>
+    <p>CISA's alerts are great — and unfiltered. You still have to read everything to find what concerns you. We only send what matches the stack you declared.</p>
+    <b>How is it prioritized?</b>
+    <p>CISA KEV (known exploited in the wild) first, then EPSS (probability of exploitation), then CVSS. Severity scores alone are a poor triage signal.</p>
+    <b>What will it cost?</b>
+    <p>A free tier (one product, weekly digest), and paid plans around the price of one coffee per week for unlimited stacks and daily alerts. Waitlist members get early-bird pricing.</p>
+  </section>
+
+  <footer>
+    StackAlert — independent project, built by an infrastructure admin.
+    Data sources: NVD, OSV.dev, CISA KEV, FIRST EPSS.
+  </footer>
+
+</div>
+<!-- Cloudflare Web Analytics (free, cookieless) — uncomment and add your token after deploy:
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
+-->
+</body>
+</html>
