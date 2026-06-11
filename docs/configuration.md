@@ -97,17 +97,28 @@ Cloudflare. Ne le construis que si le problème se présente.
 
 ---
 
-## C. Tests locaux — ~1 min
+## C. Tests locaux + démo de bout en bout — ~5 min
 
 Aucun compte requis :
 
 ```bash
 cd pipeline
-npm test          # 13 tests : matching CPE + rendu des digests
+npm test          # 17 tests : matching CPE, rendu des digests, glue démo
 node --check src/index.js
 ```
 
-À faire tourner avant chaque push qui touche `pipeline/src/`.
+**Démo avec de vraies données live** (NVD + KEV + EPSS → matching → digest
+imprimé) — à lancer depuis ta machine (réseau normal requis) :
+
+```bash
+node scripts/demo.js                                   # stack de démo, 7 jours
+node scripts/demo.js --days 14 --stack "fortinet:fortios,vmware:esxi:8.0"
+NVD_API_KEY=ta-clé node scripts/demo.js                # plus rapide avec la clé
+```
+
+Le script imprime le digest exactement comme il partirait par email, plus le
+ratio signal/bruit (CVE retenues / CVE publiées). Utile aussi comme matériel
+de démo pour les conversations de validation (semaine 3).
 
 ---
 
