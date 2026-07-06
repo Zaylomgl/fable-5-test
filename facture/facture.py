@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Générateur de factures — produit un HTML propre, imprimable en PDF (Ctrl+P).
+"""Générateur de factures et de devis — HTML propre, imprimable en PDF (Ctrl+P).
 
 Usage :
   1. Copie exemple.json et remplis tes infos + les lignes de prestation
-  2. ./facture.py ma_facture.json
+  2. ./facture.py ma_facture.json            # facture
+     ./facture.py ma_facture.json --devis    # devis (à envoyer avant la mission)
   3. Ouvre le HTML généré dans un navigateur → Imprimer → Enregistrer en PDF
 """
 
@@ -15,7 +16,7 @@ from pathlib import Path
 GABARIT = """<!doctype html>
 <html lang="fr">
 <meta charset="utf-8">
-<title>Facture {numero}</title>
+<title>{titre} {numero}</title>
 <style>
   body {{ font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #1a1a1a;
          max-width: 760px; margin: 3rem auto; padding: 0 1.5rem; line-height: 1.5; }}
@@ -38,8 +39,8 @@ GABARIT = """<!doctype html>
 </style>
 <body>
 <header>
-  <h1>FACTURE</h1>
-  <div class="num">N° {numero}<br>Date : {date}<br>Échéance : {echeance}</div>
+  <h1>{titre}</h1>
+  <div class="num">N° {numero}<br>Date : {date}<br>{libelle_echeance} : {echeance}</div>
 </header>
 <div class="blocs">
   <div class="bloc"><h2>Émetteur</h2>{emetteur}</div>
@@ -48,7 +49,7 @@ GABARIT = """<!doctype html>
 <table>
   <tr><th>Prestation</th><th class="r">Qté</th><th class="r">Prix unitaire</th><th class="r">Total</th></tr>
   {lignes}
-  <tr class="total"><td colspan="3" class="r">Total à payer</td><td class="r">{total} €</td></tr>
+  <tr class="total"><td colspan="3" class="r">{libelle_total}</td><td class="r">{total} €</td></tr>
 </table>
 <footer>
   {paiement}<br>
@@ -64,7 +65,7 @@ def bloc_adresse(d):
     return "<br>".join(c for c in champs if c)
 
 
-def generer(chemin_json):
+def generer(chemin_json, devis=False):
     data = json.loads(Path(chemin_json).read_text(encoding="utf-8"))
     lignes_html, total = [], 0.0
     for l in data["lignes"]:
@@ -75,6 +76,9 @@ def generer(chemin_json):
             f'<td class="r">{l["prix_unitaire"]:.2f} €</td><td class="r">{montant:.2f} €</td></tr>'
         )
     html = GABARIT.format(
+        titre="DEVIS" if devis else "FACTURE",
+        libelle_echeance="Validité" if devis else "Échéance",
+        libelle_total="Total du devis" if devis else "Total à payer",
         numero=data.get("numero", date.today().strftime("%Y%m%d-01")),
         date=data.get("date", date.today().strftime("%d/%m/%Y")),
         echeance=data.get("echeance", "30 jours"),
@@ -85,14 +89,18 @@ def generer(chemin_json):
         paiement=data.get("paiement", ""),
         mentions=data.get("mentions", "TVA non applicable, art. 293 B du CGI."),
     )
-    sortie = Path(chemin_json).with_suffix(".html")
+    suffixe = ".devis.html" if devis else ".html"
+    sortie = Path(chemin_json).with_suffix(suffixe)
     sortie.write_text(html, encoding="utf-8")
-    print(f"✓ Facture générée : {sortie}  (total {total:.2f} €)")
-    print("  Ouvre-la dans un navigateur puis Ctrl+P → Enregistrer en PDF")
+    doc = "Devis généré" if devis else "Facture générée"
+    print(f"✓ {doc} : {sortie}  (total {total:.2f} €)")
+    print("  Ouvre dans un navigateur puis Ctrl+P → Enregistrer en PDF")
+    return sortie, total
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage : facture.py <fichier.json>   (voir exemple.json)")
+    args = [a for a in sys.argv[1:] if a != "--devis"]
+    if len(args) != 1:
+        print("Usage : facture.py <fichier.json> [--devis]   (voir exemple.json)")
         sys.exit(1)
-    generer(sys.argv[1])
+    generer(args[0], devis="--devis" in sys.argv)

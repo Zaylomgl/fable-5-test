@@ -1,15 +1,16 @@
 # Boîte à outils perso
 
-Trois outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
+Quatre outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
 
-## 💶 `facture/` — Générateur de factures
+## 💶 `facture/` — Factures et devis
 
 Pour facturer tes missions freelance ou petits boulots avec un rendu pro.
 
 ```bash
 cp facture/exemple.json facture/ma_facture.json   # remplis tes infos et tes prestations
-python3 facture/facture.py facture/ma_facture.json
+python3 facture/facture.py facture/ma_facture.json           # facture
+python3 facture/facture.py facture/ma_facture.json --devis   # devis (avant la mission)
 ```
 
 Ça génère un HTML propre → ouvre-le dans un navigateur → `Ctrl+P` → Enregistrer en PDF.
@@ -45,6 +46,26 @@ Pour un relevé quotidien automatique, ajoute une ligne cron :
 ```
 0 9 * * * cd /chemin/vers/le/repo && python3 veille-prix/veille.py check
 ```
+
+## 💸 `abonnements/` — Suivi d'abonnements
+
+Sais enfin ce que tes abonnements te coûtent vraiment, et vois venir les prélèvements.
+
+```bash
+python3 abonnements/abos.py add "Netflix" 13.49 mensuel --jour 15
+python3 abonnements/abos.py add "Assurance" 120 annuel --date 2026-09-01
+python3 abonnements/abos.py list        # coût total €/mois et €/an
+python3 abonnements/abos.py prochains   # prélèvements dans les 30 jours
+python3 abonnements/abos.py rm "Netflix"
+```
+
+## Tests
+
+```bash
+python3 -m unittest discover tests
+```
+
+Les tests tournent aussi automatiquement en CI (GitHub Actions) à chaque push.
 
 ## Notes
 
