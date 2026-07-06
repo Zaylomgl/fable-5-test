@@ -24,9 +24,18 @@ DOSSIER = Path(__file__).parent
 PRODUITS = DOSSIER / "produits.json"
 HISTORIQUE = DOSSIER / "historique.csv"
 
-MOTIF_PRIX = re.compile(
-    r"(\d{1,4}(?:[  .]\d{3})?(?:[.,]\d{2})?)\s*€|€\s*(\d{1,4}(?:[.,]\d{2})?)"
-)
+_NOMBRE = r"\d{1,3}(?:[ \u00a0\u202f.]\d{3})+(?:,\d{2})?|\d{1,4}(?:[.,]\d{2})?"
+MOTIF_PRIX = re.compile(rf"({_NOMBRE})\s*\u20ac|\u20ac\s*({_NOMBRE})")
+_ESPACES = re.compile(r"[ \u00a0\u202f]")
+_MILLIERS_POINT = re.compile(r"^\d{1,3}(?:\.\d{3})+(?:,\d{2})?$")
+
+
+def _en_float(brut):
+    """\u00ab 1\u202f299,00 \u00bb \u2192 1299.0 ; \u00ab 1.299 \u00bb \u2192 1299.0 ; \u00ab 19.99 \u00bb \u2192 19.99"""
+    brut = _ESPACES.sub("", brut)
+    if _MILLIERS_POINT.match(brut):
+        brut = brut.replace(".", "")
+    return float(brut.replace(",", "."))
 
 
 def charger_produits():
@@ -47,9 +56,8 @@ def extraire_prix(html):
     apparaît en général plusieurs fois : titre, bouton, méta…)."""
     prix = []
     for m in MOTIF_PRIX.finditer(html):
-        brut = (m.group(1) or m.group(2)).replace(" ", "").replace(" ", "")
         try:
-            prix.append(float(brut.replace(",", ".")))
+            prix.append(_en_float(m.group(1) or m.group(2)))
         except ValueError:
             continue
     if not prix:

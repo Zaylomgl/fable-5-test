@@ -51,6 +51,9 @@ def cmd_add(args):
     abos = charger()
     abo = {"nom": args.nom, "prix": args.prix, "periode": args.periode}
     if args.periode == "mensuel":
+        if args.jour is not None and not 1 <= args.jour <= 31:
+            print("✗ --jour doit être entre 1 et 31")
+            sys.exit(1)
         abo["jour"] = args.jour or 1
     else:
         abo["date"] = args.date or date.today().isoformat()

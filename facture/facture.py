@@ -8,6 +8,7 @@ Usage :
   3. Ouvre le HTML généré dans un navigateur → Imprimer → Enregistrer en PDF
 """
 
+import html as html_mod
 import json
 import sys
 from datetime import date
@@ -60,9 +61,13 @@ GABARIT = """<!doctype html>
 """
 
 
+def esc(texte):
+    return html_mod.escape(str(texte))
+
+
 def bloc_adresse(d):
     champs = [d.get("nom", ""), d.get("adresse", ""), d.get("email", ""), d.get("siret", "")]
-    return "<br>".join(c for c in champs if c)
+    return "<br>".join(esc(c) for c in champs if c)
 
 
 def generer(chemin_json, devis=False):
@@ -72,22 +77,22 @@ def generer(chemin_json, devis=False):
         montant = l["quantite"] * l["prix_unitaire"]
         total += montant
         lignes_html.append(
-            f'<tr><td>{l["description"]}</td><td class="r">{l["quantite"]:g}</td>'
+            f'<tr><td>{esc(l["description"])}</td><td class="r">{l["quantite"]:g}</td>'
             f'<td class="r">{l["prix_unitaire"]:.2f} €</td><td class="r">{montant:.2f} €</td></tr>'
         )
     html = GABARIT.format(
         titre="DEVIS" if devis else "FACTURE",
         libelle_echeance="Validité" if devis else "Échéance",
         libelle_total="Total du devis" if devis else "Total à payer",
-        numero=data.get("numero", date.today().strftime("%Y%m%d-01")),
-        date=data.get("date", date.today().strftime("%d/%m/%Y")),
-        echeance=data.get("echeance", "30 jours"),
+        numero=esc(data.get("numero", date.today().strftime("%Y%m%d-01"))),
+        date=esc(data.get("date", date.today().strftime("%d/%m/%Y"))),
+        echeance=esc(data.get("echeance", "30 jours")),
         emetteur=bloc_adresse(data["emetteur"]),
         client=bloc_adresse(data["client"]),
         lignes="\n  ".join(lignes_html),
         total=f"{total:.2f}",
-        paiement=data.get("paiement", ""),
-        mentions=data.get("mentions", "TVA non applicable, art. 293 B du CGI."),
+        paiement=esc(data.get("paiement", "")),
+        mentions=esc(data.get("mentions", "TVA non applicable, art. 293 B du CGI.")),
     )
     suffixe = ".devis.html" if devis else ".html"
     sortie = Path(chemin_json).with_suffix(suffixe)

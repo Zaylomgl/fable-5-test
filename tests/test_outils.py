@@ -41,6 +41,15 @@ class TestVeillePrix(unittest.TestCase):
     def test_aucun_prix(self):
         self.assertIsNone(veille.extraire_prix("<html>rien ici</html>"))
 
+    def test_milliers_point(self):
+        self.assertEqual(veille.extraire_prix("promo 1.299 €"), 1299.0)
+
+    def test_milliers_espace(self):
+        self.assertEqual(veille.extraire_prix("promo 1 299,00 €"), 1299.0)
+
+    def test_milliers_insecable(self):
+        self.assertEqual(veille.extraire_prix("promo 1 299 €"), 1299.0)
+
 
 class TestFacture(unittest.TestCase):
     def _donnees(self):
@@ -63,6 +72,17 @@ class TestFacture(unittest.TestCase):
             html = sortie.read_text(encoding="utf-8")
             self.assertIn("FACTURE", html)
             self.assertIn("250.50 €", html)
+
+    def test_echappement_html(self):
+        donnees = self._donnees()
+        donnees["lignes"][0]["description"] = "Maintenance <serveur> & suivi"
+        with tempfile.TemporaryDirectory() as d:
+            j = Path(d) / "f.json"
+            j.write_text(json.dumps(donnees), encoding="utf-8")
+            sortie, _ = facture.generer(j)
+            html = sortie.read_text(encoding="utf-8")
+            self.assertIn("Maintenance &lt;serveur&gt; &amp; suivi", html)
+            self.assertNotIn("<serveur>", html)
 
     def test_mode_devis(self):
         with tempfile.TemporaryDirectory() as d:
@@ -96,6 +116,12 @@ class TestAbonnements(unittest.TestCase):
         abo = {"periode": "mensuel", "jour": 1}
         self.assertEqual(
             abos.prochaine_echeance(abo, date(2026, 12, 15)), date(2027, 1, 1)
+        )
+
+    def test_jour_31_plafonne_a_28(self):
+        abo = {"periode": "mensuel", "jour": 31}
+        self.assertEqual(
+            abos.prochaine_echeance(abo, date(2026, 2, 10)), date(2026, 2, 28)
         )
 
     def test_echeance_annuelle(self):
