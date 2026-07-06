@@ -30,6 +30,15 @@ relance = charger_module("relance/relance.py", "relance")
 trajet = charger_module("trajet/trajet.py", "trajet")
 epargne = charger_module("epargne/epargne.py", "epargne")
 resiliation = charger_module("resiliation/resiliation.py", "resiliation")
+hasard = charger_module("hasard/hasard.py", "hasard")
+pct = charger_module("pourcentage/pct.py", "pct")
+conv = charger_module("conversion/conv.py", "conv")
+imc = charger_module("sante/imc.py", "imc")
+age = charger_module("age/age.py", "age")
+menu = charger_module("menu/menu.py", "menu")
+texte = charger_module("texte/texte.py", "texte")
+citation = charger_module("citation/citation.py", "citation")
+devine = charger_module("jeu/devine.py", "devine")
 
 
 class TestVeillePrix(unittest.TestCase):
@@ -355,6 +364,79 @@ class TestTempoEtCourses(unittest.TestCase):
             r = self._run_copie("courses/courses.py", d)
             self.assertNotIn("pâtes", r.stdout)
             self.assertIn("tomates", r.stdout)
+
+
+class TestGadgets(unittest.TestCase):
+    def test_hasard(self):
+        self.assertIn(hasard.pile_ou_face(), ["PILE", "FACE"])
+        for _ in range(50):
+            self.assertTrue(1 <= hasard.de(20) <= 20)
+        self.assertEqual(sorted(hasard.melange(["a", "b", "c"])), ["a", "b", "c"])
+        self.assertIn(hasard.choisis(["x", "y"]), ["x", "y"])
+
+    def test_pourcentages(self):
+        self.assertAlmostEqual(pct.de(20, 150), 30.0)
+        self.assertAlmostEqual(pct.remise(25, 80), 60.0)
+        self.assertAlmostEqual(pct.hausse(10, 1200), 1320.0)
+        self.assertAlmostEqual(pct.part(30, 120), 25.0)
+        self.assertAlmostEqual(pct.evolution(80, 100), 25.0)
+
+    def test_conversions(self):
+        self.assertAlmostEqual(conv.convertir(10, "km", "miles"), 6.2137, places=3)
+        self.assertAlmostEqual(conv.convertir(0, "c", "f"), 32.0)
+        self.assertAlmostEqual(conv.convertir(212, "f", "c"), 100.0)
+        self.assertAlmostEqual(conv.convertir(1, "kg", "lbs"), 2.2046, places=3)
+        self.assertAlmostEqual(conv.convertir(2, "h", "min"), 120.0)
+        with self.assertRaises(ValueError):
+            conv.convertir(1, "km", "kg")
+
+    def test_imc(self):
+        self.assertAlmostEqual(imc.imc(70, 1.78), 22.09, places=1)
+        self.assertEqual(imc.categorie(22), "corpulence normale")
+        self.assertEqual(imc.categorie(17), "insuffisance pondérale")
+        self.assertEqual(imc.categorie(27), "surpoids")
+
+    def test_age(self):
+        r = age.age_exact(date(2006, 4, 12), date(2026, 7, 6))
+        self.assertEqual(r["annees"], 20)
+        self.assertEqual(r["prochain_anniv"], date(2027, 4, 12))
+        r = age.age_exact(date(2006, 8, 1), date(2026, 7, 6))
+        self.assertEqual(r["annees"], 19)  # pas encore l'anniv cette année
+        self.assertEqual(r["jours_avant_anniv"], 26)
+
+    def test_menu(self):
+        self.assertIn(menu.idee(), menu.PLATS)
+        self.assertIn(menu.idee(rapide=True), menu.RAPIDES)
+        plats = menu.semaine()
+        self.assertEqual(len(plats), 7)
+        self.assertEqual(len(set(plats)), 7)  # pas deux fois le même
+
+    def test_texte(self):
+        s = texte.stats("un deux trois")
+        self.assertEqual(s["mots"], 3)
+        self.assertEqual(texte.slug("Mon Titre d'Article, déjà vu !"), "mon-titre-d-article-deja-vu")
+
+    def test_citation_stable_dans_la_journee(self):
+        self.assertEqual(citation.du_jour(date(2026, 7, 6)), citation.du_jour(date(2026, 7, 6)))
+        # et couvre bien toute la liste sur la durée
+        vues = {citation.du_jour(date.fromordinal(738000 + i)) for i in range(40)}
+        self.assertEqual(len(vues), len(citation.CITATIONS))
+
+    def test_devine(self):
+        etat = {"lo": 1, "hi": 100, "dernier": None}
+
+        def joueur(_):
+            etat["dernier"] = (etat["lo"] + etat["hi"]) // 2
+            return str(etat["dernier"])
+
+        def arbitre(msg):
+            if "plus" in msg:
+                etat["lo"] = etat["dernier"] + 1
+            elif "moins" in msg:
+                etat["hi"] = etat["dernier"] - 1
+
+        essais = devine.partie(100, entree=joueur, sortie=arbitre)
+        self.assertLessEqual(essais, 7)  # la dichotomie gagne en ≤ log2(100) coups
 
 
 if __name__ == "__main__":

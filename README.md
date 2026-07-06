@@ -1,6 +1,6 @@
 # Boîte à outils perso
 
-Quatorze outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
+Vingt-quatre outils, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
 
 **Gagner de l'argent (freelance / petits boulots) :**
@@ -31,6 +31,35 @@ Aucune installation : clone le repo et lance les scripts.
 | 🔐 `motdepasse/` | Mots de passe et phrases de passe sécurisés |
 | 📅 `rappels/` | Anniversaires et échéances, avec compte à rebours |
 | 🛒 `courses/` | Liste de courses en CLI |
+| 🍅 `pomodoro/` | Minuteur focus/pause dans le terminal |
+| ☀️ `meteo/` | Météo en CLI (via wttr.in, sans clé API) |
+| 🍽 `menu/` | « On mange quoi ce soir ? » — tirage au sort de repas |
+| 📝 `texte/` | Compteur de mots, slugs, majuscules/minuscules |
+
+**Gadgets utiles :**
+
+| Outil | À quoi ça sert |
+|---|---|
+| 🎲 `hasard/` | Pile ou face, dés, tirage au sort, mélange d'ordre |
+| ➗ `pourcentage/` | Remises, hausses, évolutions — sans se tromper |
+| 📏 `conversion/` | km/miles, °C/°F, kg/lbs, litres/gallons… |
+| ⚖️ `sante/` | IMC et hydratation (indicatif) |
+| 🎂 `age/` | Ton âge exact en jours/heures + compte à rebours anniv |
+| 💬 `citation/` | La citation du jour (pour le `.bashrc`) |
+| 🎮 `jeu/` | Devine le nombre, pour tuer 2 minutes |
+
+Exemples rapides :
+
+```bash
+python3 hasard/hasard.py choisis "pizza" "sushi" "kebab"   # 👉 kebab
+python3 pourcentage/pct.py remise 25 80                    # 80 € −25 % = 60 €
+python3 conversion/conv.py 10 km miles                     # 6.214 miles
+python3 age/age.py 2006-04-12                              # âge exact + jours avant l'anniv
+python3 menu/menu.py semaine                               # 7 repas planifiés
+python3 pomodoro/pomodoro.py 50 10 -c 2                    # 2 × (50 min focus + 10 pause)
+python3 meteo/meteo.py Paris                               # météo du moment
+python3 jeu/devine.py 1000                                 # devine le nombre
+```
 
 ## 💶 `facture/` — Factures et devis
 
