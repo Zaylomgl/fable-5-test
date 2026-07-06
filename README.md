@@ -1,7 +1,19 @@
 # Boîte à outils perso
 
-Quatre outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
+Neuf outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
+
+| Outil | À quoi ça sert |
+|---|---|
+| 💶 `facture/` | Factures et devis pro pour tes missions freelance |
+| 📧 `relance/` | Mails de relance pour factures impayées (3 niveaux) |
+| 📈 `tjm/` | Calcule le tarif journalier à facturer selon le revenu visé |
+| 📊 `budget/` | Suivi de dépenses/revenus, bilan mensuel |
+| 💸 `abonnements/` | Coût réel de tes abonnements + prélèvements à venir |
+| 📉 `veille-prix/` | Alerte quand un prix baisse |
+| 🤝 `partage/` | Partage de dépenses entre potes/coloc (façon Tricount) |
+| 🔐 `motdepasse/` | Mots de passe et phrases de passe sécurisés |
+| 📅 `rappels/` | Anniversaires et échéances, avec compte à rebours |
 
 ## 💶 `facture/` — Factures et devis
 
@@ -45,6 +57,62 @@ Pour un relevé quotidien automatique, ajoute une ligne cron :
 
 ```
 0 9 * * * cd /chemin/vers/le/repo && python3 veille-prix/veille.py check
+```
+
+## 📧 `relance/` — Mails de relance de facture
+
+Un client ne paie pas ? Génère le mail de relance adapté, à copier-coller.
+
+```bash
+python3 relance/relance.py facture/ma_facture.json              # J+7 : rappel courtois
+python3 relance/relance.py facture/ma_facture.json --niveau 2   # J+21 : relance ferme
+python3 relance/relance.py facture/ma_facture.json --niveau 3   # J+35 : dernier avis
+```
+
+## 📈 `tjm/` — Calculateur de tarif freelance
+
+Combien facturer pour gagner ce que tu veux ? Réponse en une commande.
+
+```bash
+python3 tjm/tjm.py 2000                # je veux 2000 € net/mois
+python3 tjm/tjm.py 2000 --jours 12     # en facturant 12 jours/mois
+```
+
+Affiche le CA à réaliser, le TJM, le taux horaire, et prévient si tu
+dépasses le plafond micro-entreprise.
+
+## 🤝 `partage/` — Dépenses de groupe
+
+Vacances, coloc, resto : qui doit combien à qui, avec le minimum de virements.
+
+```bash
+python3 partage/partage.py add "Alice" 30 "Courses"                 # partagé entre tous
+python3 partage/partage.py add "Bob" 45 "Essence" --pour Alice Bob  # entre certains
+python3 partage/partage.py solde    # qui est en + / en −
+python3 partage/partage.py regle    # « Bob → Alice : 10.00 € »
+python3 partage/partage.py reset    # archive et repart de zéro
+```
+
+## 🔐 `motdepasse/` — Générateur de mots de passe
+
+Aléa cryptographique (module `secrets`), jamais stocké nulle part.
+
+```bash
+python3 motdepasse/mdp.py               # 20 caractères robustes
+python3 motdepasse/mdp.py gen -l 32     # plus long
+python3 motdepasse/mdp.py phrase        # « noyau-lune-canard-badge-piano-65 »
+python3 motdepasse/mdp.py pin           # code PIN 6 chiffres
+```
+
+## 📅 `rappels/` — Dates importantes
+
+Anniversaires (annuels) et échéances (uniques), triés par urgence.
+
+```bash
+python3 rappels/rappels.py add "Anniv Maman" 03-14             # tous les ans
+python3 rappels/rappels.py add "Rendre le rapport" 2026-09-30  # une fois
+python3 rappels/rappels.py list      # tout
+python3 rappels/rappels.py bientot   # dans les 14 jours — à mettre dans ~/.bashrc
 ```
 
 ## 💸 `abonnements/` — Suivi d'abonnements

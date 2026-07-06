@@ -3,6 +3,9 @@ budget/operations.csv
 veille-prix/produits.json
 veille-prix/historique.csv
 abonnements/abonnements.json
+partage/depenses.json
+partage/depenses-*.json
+rappels/rappels.json
 facture/*.html
 facture/*.json
 !facture/exemple.json
