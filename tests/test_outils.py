@@ -27,6 +27,9 @@ mdp = charger_module("motdepasse/mdp.py", "mdp")
 rappels = charger_module("rappels/rappels.py", "rappels")
 tjm = charger_module("tjm/tjm.py", "tjm")
 relance = charger_module("relance/relance.py", "relance")
+trajet = charger_module("trajet/trajet.py", "trajet")
+epargne = charger_module("epargne/epargne.py", "epargne")
+resiliation = charger_module("resiliation/resiliation.py", "resiliation")
 
 
 class TestVeillePrix(unittest.TestCase):
@@ -266,6 +269,92 @@ class TestRelance(unittest.TestCase):
                 self.assertIn(attendu, texte)
                 self.assertIn("2026-042", texte)
                 self.assertIn("200.00", texte)
+
+
+class TestTrajet(unittest.TestCase):
+    def test_calcul_complet(self):
+        r = trajet.calculer(100, conso=6.0, prix_litre=2.0, peage=10, passagers=2, usure=0.10)
+        self.assertAlmostEqual(r["carburant"], 12.0)
+        self.assertAlmostEqual(r["entretien"], 10.0)
+        self.assertAlmostEqual(r["total"], 32.0)
+        self.assertAlmostEqual(r["par_personne"], 16.0)
+
+    def test_essence_seule(self):
+        r = trajet.calculer(200, conso=5.0, prix_litre=1.8, usure=0)
+        self.assertAlmostEqual(r["total"], 18.0)
+
+
+class TestEpargne(unittest.TestCase):
+    def test_mois_restants(self):
+        self.assertEqual(epargne.mois_restants(date(2027, 7, 6), date(2026, 7, 6)), 12)
+        self.assertEqual(epargne.mois_restants(date(2026, 7, 20), date(2026, 7, 6)), 1)
+
+    def test_sans_interets(self):
+        self.assertAlmostEqual(epargne.mensualite(1200, 12), 100.0)
+        self.assertAlmostEqual(epargne.mensualite(1200, 12, deja=200), 1000 / 12)
+
+    def test_objectif_atteint(self):
+        self.assertEqual(epargne.mensualite(1000, 12, deja=1500), 0.0)
+
+    def test_avec_interets_moins_cher(self):
+        sans = epargne.mensualite(10000, 24)
+        avec = epargne.mensualite(10000, 24, taux_annuel=3)
+        self.assertLess(avec, sans)
+        # la valeur future des versements doit atteindre l'objectif
+        t = 0.03 / 12
+        futur = avec * ((1 + t) ** 24 - 1) / t
+        self.assertAlmostEqual(futur, 10000, places=2)
+
+
+class TestResiliation(unittest.TestCase):
+    def test_lettre_complete(self):
+        lettre = resiliation.generer(
+            "FitPlus", "Théo", "12 rue X", numero="C-42",
+            motif="demenagement", quand=date(2026, 7, 6),
+        )
+        self.assertIn("FitPlus", lettre)
+        self.assertIn("contrat n° C-42", lettre)
+        self.assertIn("déménagement", lettre)
+        self.assertIn("06/07/2026", lettre)
+
+    def test_sans_numero(self):
+        lettre = resiliation.generer("Netflix", "Théo", "12 rue X")
+        self.assertNotIn("contrat n°", lettre)
+        self.assertIn("ne pas le reconduire", lettre)
+
+
+class TestTempoEtCourses(unittest.TestCase):
+    def _run_copie(self, source, dossier, *args):
+        script = Path(dossier) / Path(source).name
+        if not script.exists():
+            script.write_text((RACINE / source).read_text(encoding="utf-8"), encoding="utf-8")
+        return subprocess.run(
+            [sys.executable, str(script), *args],
+            capture_output=True, text=True,
+        )
+
+    def test_tempo_cycle(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run_copie("tempo/tempo.py", d, "start", "Projet X")
+            self.assertIn("démarrée", r.stdout)
+            r = self._run_copie("tempo/tempo.py", d, "start", "Projet Y")
+            self.assertEqual(r.returncode, 1)  # refuse deux sessions en même temps
+            r = self._run_copie("tempo/tempo.py", d, "stop")
+            self.assertIn("Projet X", r.stdout)
+            r = self._run_copie("tempo/tempo.py", d, "bilan", "--tjm", "350")
+            self.assertIn("Projet X", r.stdout)
+            self.assertIn("À facturer", r.stdout)
+
+    def test_courses_cycle(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._run_copie("courses/courses.py", d, "add", "pâtes", "tomates")
+            r = self._run_copie("courses/courses.py", d)
+            self.assertIn("pâtes", r.stdout)
+            self._run_copie("courses/courses.py", d, "done", "pâtes")
+            self._run_copie("courses/courses.py", d, "clear")
+            r = self._run_copie("courses/courses.py", d)
+            self.assertNotIn("pâtes", r.stdout)
+            self.assertIn("tomates", r.stdout)
 
 
 if __name__ == "__main__":

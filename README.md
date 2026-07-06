@@ -1,19 +1,36 @@
 # Boîte à outils perso
 
-Neuf outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
+Quatorze outils concrets, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
+
+**Gagner de l'argent (freelance / petits boulots) :**
 
 | Outil | À quoi ça sert |
 |---|---|
-| 💶 `facture/` | Factures et devis pro pour tes missions freelance |
+| 💶 `facture/` | Factures et devis pro |
 | 📧 `relance/` | Mails de relance pour factures impayées (3 niveaux) |
-| 📈 `tjm/` | Calcule le tarif journalier à facturer selon le revenu visé |
+| 📈 `tjm/` | Le tarif journalier à facturer selon le revenu visé |
+| ⏱ `tempo/` | Pointeuse par projet — facture tes heures au juste prix |
+
+**Gérer ton argent :**
+
+| Outil | À quoi ça sert |
+|---|---|
 | 📊 `budget/` | Suivi de dépenses/revenus, bilan mensuel |
 | 💸 `abonnements/` | Coût réel de tes abonnements + prélèvements à venir |
+| ✂️ `resiliation/` | Lettre de résiliation d'abonnement prête à envoyer |
 | 📉 `veille-prix/` | Alerte quand un prix baisse |
-| 🤝 `partage/` | Partage de dépenses entre potes/coloc (façon Tricount) |
+| 🎯 `epargne/` | Combien mettre de côté par mois pour ton objectif |
+| 🤝 `partage/` | Dépenses entre potes/coloc (façon Tricount) |
+| 🚗 `trajet/` | Coût réel d'un trajet en voiture, part par passager |
+
+**Quotidien :**
+
+| Outil | À quoi ça sert |
+|---|---|
 | 🔐 `motdepasse/` | Mots de passe et phrases de passe sécurisés |
 | 📅 `rappels/` | Anniversaires et échéances, avec compte à rebours |
+| 🛒 `courses/` | Liste de courses en CLI |
 
 ## 💶 `facture/` — Factures et devis
 
@@ -125,6 +142,53 @@ python3 abonnements/abos.py add "Assurance" 120 annuel --date 2026-09-01
 python3 abonnements/abos.py list        # coût total €/mois et €/an
 python3 abonnements/abos.py prochains   # prélèvements dans les 30 jours
 python3 abonnements/abos.py rm "Netflix"
+```
+
+## ⏱ `tempo/` — Pointeuse freelance
+
+Mesure ton temps réel par projet pour facturer juste (et prouver tes heures).
+
+```bash
+python3 tempo/tempo.py start "Site Dupont"   # au début du travail
+python3 tempo/tempo.py stop                  # à la fin
+python3 tempo/tempo.py bilan --tjm 350       # heures + montant à facturer
+```
+
+## ✂️ `resiliation/` — Lettre de résiliation
+
+Génère la lettre recommandée pour résilier un abonnement (salle, box, assurance…).
+
+```bash
+python3 resiliation/resiliation.py "Salle FitPlus" --numero C-12345 \
+    --nom "Ton Nom" --adresse "12 rue Exemple, 75000 Paris"
+python3 resiliation/resiliation.py "Salle FitPlus" --motif demenagement ...  # résiliation anticipée
+```
+
+## 🎯 `epargne/` — Objectif d'épargne
+
+```bash
+python3 epargne/epargne.py 3000 2027-06-01              # 3000 € pour juin 2027
+python3 epargne/epargne.py 3000 2027-06-01 --deja 500 --taux 3   # Livret A à 3 %
+```
+
+Donne le versement mensuel (et hebdo), intérêts composés inclus si tu places l'argent.
+
+## 🚗 `trajet/` — Coût d'un trajet en voiture
+
+```bash
+python3 trajet/trajet.py 450 --peage 35 --passagers 3
+```
+
+Carburant + péages + usure du véhicule, et la juste part de chaque passager
+(pratique pour fixer un prix de covoiturage honnête).
+
+## 🛒 `courses/` — Liste de courses
+
+```bash
+python3 courses/courses.py add "pâtes" "tomates" "parmesan"
+python3 courses/courses.py               # afficher
+python3 courses/courses.py done "pâtes"  # coché
+python3 courses/courses.py clear         # retire ce qui est coché
 ```
 
 ## Tests

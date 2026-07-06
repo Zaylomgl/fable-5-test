@@ -6,6 +6,9 @@ abonnements/abonnements.json
 partage/depenses.json
 partage/depenses-*.json
 rappels/rappels.json
+tempo/en_cours.json
+tempo/sessions.csv
+courses/liste.json
 facture/*.html
 facture/*.json
 !facture/exemple.json
