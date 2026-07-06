@@ -9,6 +9,8 @@ rappels/rappels.json
 tempo/en_cours.json
 tempo/sessions.csv
 courses/liste.json
+habitudes/habitudes.json
+notes/notes.json
 facture/*.html
 facture/*.json
 !facture/exemple.json

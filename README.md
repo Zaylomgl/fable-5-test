@@ -1,6 +1,6 @@
 # Boîte à outils perso
 
-Trente outils, en français, **zéro dépendance** (Python 3 standard uniquement).
+Quarante-deux outils, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
 
 **Gagner de l'argent (freelance / petits boulots) :**
@@ -23,6 +23,9 @@ Aucune installation : clone le repo et lance les scripts.
 | 🎯 `epargne/` | Combien mettre de côté par mois pour ton objectif |
 | 🤝 `partage/` | Dépenses entre potes/coloc (façon Tricount) |
 | 🚗 `trajet/` | Coût réel d'un trajet en voiture, part par passager |
+| 🧾 `tva/` | HT ↔ TTC à tous les taux |
+| 🏦 `pret/` | Mensualité et coût réel d'un crédit |
+| 🍽 `pourboire/` | Pourboire + partage d'addition |
 
 **Quotidien :**
 
@@ -35,6 +38,9 @@ Aucune installation : clone le repo et lance les scripts.
 | ☀️ `meteo/` | Météo en CLI (via wttr.in, sans clé API) |
 | 🍽 `menu/` | « On mange quoi ce soir ? » — tirage au sort de repas |
 | 📝 `texte/` | Compteur de mots, slugs, majuscules/minuscules |
+| ✅ `habitudes/` | Suivi d'habitudes avec séries (streaks) |
+| 🗒 `notes/` | Notes rapides en CLI |
+| 👨‍🍳 `cuisine/` | Cuillères ↔ ml ↔ grammes, sans balance |
 
 **Gadgets utiles :**
 
@@ -53,6 +59,12 @@ Aucune installation : clone le repo et lance les scripts.
 | 📡 `morse/` | Texte ↔ morse |
 | 🔢 `bases/` | Décimal ↔ binaire ↔ hexa ↔ octal |
 | ⏲ `chrono/` | Chronomètre avec tours |
+| ✍️ `lettres/` | Nombre en toutes lettres (chèques, contrats) |
+| 🏛 `romain/` | Chiffres romains ↔ arabes |
+| 🕵️ `cesar/` | Chiffre de César (messages secrets pour jouer) |
+| 🎲 `scrabble/` | Score d'un mot au Scrabble (barème français) |
+| 📆 `datejour/` | Numéro de semaine, jour de l'année, bissextile |
+| ➕ `jours/` | Jours entre deux dates, date dans N jours |
 
 Exemples rapides :
 

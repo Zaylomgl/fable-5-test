@@ -44,6 +44,17 @@ feries = charger_module("feries/feries.py", "feries")
 couleur = charger_module("couleur/couleur.py", "couleur")
 morse = charger_module("morse/morse.py", "morse")
 bases = charger_module("bases/bases.py", "bases")
+tva = charger_module("tva/tva.py", "tva")
+pret = charger_module("pret/pret.py", "pret")
+pourboire = charger_module("pourboire/pourboire.py", "pourboire")
+cuisine = charger_module("cuisine/cuisine.py", "cuisine")
+lettres = charger_module("lettres/lettres.py", "lettres")
+romain = charger_module("romain/romain.py", "romain")
+cesar = charger_module("cesar/cesar.py", "cesar")
+scrabble = charger_module("scrabble/scrabble.py", "scrabble")
+datejour = charger_module("datejour/datejour.py", "datejour")
+jours = charger_module("jours/jours.py", "jours")
+habitudes = charger_module("habitudes/habitudes.py", "habitudes")
 
 
 class TestVeillePrix(unittest.TestCase):
@@ -488,6 +499,85 @@ class TestGadgets2(unittest.TestCase):
         self.assertEqual(r["hexadecimal"], "0xff")
         self.assertEqual(bases.convertir("0xff")["decimal"], "255")
         self.assertEqual(bases.convertir("0b1010")["decimal"], "10")
+
+
+class TestGadgets3(unittest.TestCase):
+    def test_tva(self):
+        self.assertAlmostEqual(tva.vers_ttc(100), 120.0)
+        self.assertAlmostEqual(tva.vers_ht(120), 100.0)
+        self.assertAlmostEqual(tva.vers_ttc(100, 5.5), 105.5)
+
+    def test_pret(self):
+        m = pret.mensualite(10000, 4.5, 60)
+        self.assertAlmostEqual(m, 186.43, places=1)
+        self.assertAlmostEqual(pret.mensualite(1200, 0, 12), 100.0)
+
+    def test_pourboire(self):
+        r = pourboire.calculer(80, tip_pct=10, personnes=4)
+        self.assertAlmostEqual(r["total"], 88.0)
+        self.assertAlmostEqual(r["par_personne"], 22.0)
+
+    def test_cuisine(self):
+        self.assertAlmostEqual(cuisine.convertir(3, "cas", "ml"), 45.0)
+        self.assertAlmostEqual(cuisine.convertir(250, "ml", "tasse"), 1.0)
+        self.assertAlmostEqual(cuisine.convertir(1, "tasse", "g", "farine"), 137.5)
+        with self.assertRaises(ValueError):
+            cuisine.convertir(1, "tasse", "g")  # ingrédient manquant
+
+    def test_nombres_en_lettres(self):
+        cas = {
+            0: "zéro", 17: "dix-sept", 21: "vingt-et-un", 71: "soixante-et-onze",
+            75: "soixante-quinze", 80: "quatre-vingts", 81: "quatre-vingt-un",
+            95: "quatre-vingt-quinze", 100: "cent", 101: "cent-un",
+            200: "deux-cents", 201: "deux-cent-un", 1000: "mille",
+            1999: "mille-neuf-cent-quatre-vingt-dix-neuf",
+            2026: "deux-mille-vingt-six",
+        }
+        for n, attendu in cas.items():
+            self.assertEqual(lettres.en_lettres(n), attendu, msg=f"n={n}")
+        with self.assertRaises(ValueError):
+            lettres.en_lettres(1_000_000)
+
+    def test_romain(self):
+        self.assertEqual(romain.vers_romain(2026), "MMXXVI")
+        self.assertEqual(romain.vers_romain(1994), "MCMXCIV")
+        self.assertEqual(romain.vers_arabe("MCMXCIV"), 1994)
+        for n in (1, 4, 9, 14, 40, 90, 400, 3999):
+            self.assertEqual(romain.vers_arabe(romain.vers_romain(n)), n)
+        with self.assertRaises(ValueError):
+            romain.vers_arabe("IIII")
+
+    def test_cesar(self):
+        self.assertEqual(cesar.decaler("abc", 3), "def")
+        self.assertEqual(cesar.decaler("xyz", 3), "abc")
+        self.assertEqual(cesar.decaler(cesar.decaler("Rendez-vous a midi !", 7), -7),
+                         "Rendez-vous a midi !")
+
+    def test_scrabble(self):
+        self.assertEqual(scrabble.score("maison"), 7)   # 2+1+1+1+1+1
+        self.assertEqual(scrabble.score("kayak"), 32)   # 10+1+10+1+10
+        self.assertEqual(scrabble.score("été"), scrabble.score("ete"))
+
+    def test_datejour(self):
+        r = datejour.infos(date(2026, 7, 6))
+        self.assertEqual(r["semaine_iso"], 28)
+        self.assertEqual(r["jour_annee"], 187)
+        self.assertFalse(r["bissextile"])
+        self.assertEqual(r["trimestre"], 3)
+        self.assertTrue(datejour.infos(date(2024, 1, 1))["bissextile"])
+
+    def test_jours(self):
+        self.assertEqual(jours.entre(date(2026, 7, 6), date(2026, 12, 25)), 172)
+        self.assertEqual(jours.dans(90, date(2026, 7, 6)), date(2026, 10, 4))
+
+    def test_habitudes_serie(self):
+        auj = date(2026, 7, 6)
+        faits = ["2026-07-06", "2026-07-05", "2026-07-04", "2026-07-01"]
+        self.assertEqual(habitudes.serie(faits, auj), 3)
+        # série qui tient encore si on n'a pas coché aujourd'hui
+        self.assertEqual(habitudes.serie(["2026-07-05", "2026-07-04"], auj), 2)
+        self.assertEqual(habitudes.serie(["2026-07-01"], auj), 0)
+        self.assertEqual(habitudes.serie([], auj), 0)
 
 
 if __name__ == "__main__":
