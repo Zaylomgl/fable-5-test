@@ -39,6 +39,11 @@ menu = charger_module("menu/menu.py", "menu")
 texte = charger_module("texte/texte.py", "texte")
 citation = charger_module("citation/citation.py", "citation")
 devine = charger_module("jeu/devine.py", "devine")
+sommeil = charger_module("sommeil/sommeil.py", "sommeil")
+feries = charger_module("feries/feries.py", "feries")
+couleur = charger_module("couleur/couleur.py", "couleur")
+morse = charger_module("morse/morse.py", "morse")
+bases = charger_module("bases/bases.py", "bases")
 
 
 class TestVeillePrix(unittest.TestCase):
@@ -437,6 +442,52 @@ class TestGadgets(unittest.TestCase):
 
         essais = devine.partie(100, entree=joueur, sortie=arbitre)
         self.assertLessEqual(essais, 7)  # la dichotomie gagne en ≤ log2(100) coups
+
+
+class TestGadgets2(unittest.TestCase):
+    def test_sommeil(self):
+        from datetime import datetime
+        lever = datetime.strptime("07:00", "%H:%M")
+        couchers = dict((n, h) for h, n in sommeil.heures_de_coucher(lever))
+        self.assertEqual(couchers[6].strftime("%H:%M"), "21:45")
+        self.assertEqual(couchers[5].strftime("%H:%M"), "23:15")
+
+    def test_paques_dates_connues(self):
+        self.assertEqual(feries.paques(2024), date(2024, 3, 31))
+        self.assertEqual(feries.paques(2025), date(2025, 4, 20))
+        self.assertEqual(feries.paques(2026), date(2026, 4, 5))
+
+    def test_feries_annee_complete(self):
+        jours = dict(feries.jours_feries(2026))
+        self.assertEqual(len(jours), 11)
+        self.assertEqual(jours[date(2026, 5, 14)], "Ascension")   # Pâques + 39
+        self.assertEqual(jours[date(2026, 4, 6)], "Lundi de Pâques")
+
+    def test_prochain_ferie(self):
+        jour, nom = feries.prochain(date(2026, 7, 6))
+        self.assertEqual((jour, nom), (date(2026, 7, 14), "Fête nationale"))
+
+    def test_couleur(self):
+        self.assertEqual(couleur.hex_vers_rgb("#ff6600"), (255, 102, 0))
+        self.assertEqual(couleur.hex_vers_rgb("f60"), (255, 102, 0))
+        self.assertEqual(couleur.rgb_vers_hex(255, 102, 0), "#ff6600")
+        with self.assertRaises(ValueError):
+            couleur.rgb_vers_hex(300, 0, 0)
+        with self.assertRaises(ValueError):
+            couleur.hex_vers_rgb("#12345")
+
+    def test_morse_aller_retour(self):
+        self.assertEqual(morse.coder("sos"), "... --- ...")
+        self.assertEqual(morse.decoder("... --- ..."), "sos")
+        self.assertEqual(morse.decoder(morse.coder("salut ca va")), "salut ca va")
+        self.assertEqual(morse.coder("été"), morse.coder("ete"))  # accents gérés
+
+    def test_bases(self):
+        r = bases.convertir("255")
+        self.assertEqual(r["binaire"], "0b11111111")
+        self.assertEqual(r["hexadecimal"], "0xff")
+        self.assertEqual(bases.convertir("0xff")["decimal"], "255")
+        self.assertEqual(bases.convertir("0b1010")["decimal"], "10")
 
 
 if __name__ == "__main__":

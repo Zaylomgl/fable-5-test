@@ -1,6 +1,6 @@
 # Boîte à outils perso
 
-Vingt-quatre outils, en français, **zéro dépendance** (Python 3 standard uniquement).
+Trente outils, en français, **zéro dépendance** (Python 3 standard uniquement).
 Aucune installation : clone le repo et lance les scripts.
 
 **Gagner de l'argent (freelance / petits boulots) :**
@@ -47,6 +47,12 @@ Aucune installation : clone le repo et lance les scripts.
 | 🎂 `age/` | Ton âge exact en jours/heures + compte à rebours anniv |
 | 💬 `citation/` | La citation du jour (pour le `.bashrc`) |
 | 🎮 `jeu/` | Devine le nombre, pour tuer 2 minutes |
+| 😴 `sommeil/` | À quelle heure se coucher (cycles de 90 min) |
+| 🇫🇷 `feries/` | Jours fériés français calculés + le prochain |
+| 🎨 `couleur/` | Hex ↔ RGB avec aperçu dans le terminal |
+| 📡 `morse/` | Texte ↔ morse |
+| 🔢 `bases/` | Décimal ↔ binaire ↔ hexa ↔ octal |
+| ⏲ `chrono/` | Chronomètre avec tours |
 
 Exemples rapides :
 
@@ -59,6 +65,12 @@ python3 menu/menu.py semaine                               # 7 repas planifiés
 python3 pomodoro/pomodoro.py 50 10 -c 2                    # 2 × (50 min focus + 10 pause)
 python3 meteo/meteo.py Paris                               # météo du moment
 python3 jeu/devine.py 1000                                 # devine le nombre
+python3 sommeil/sommeil.py lever 07:00                     # → couche-toi à 23:15
+python3 feries/feries.py prochain                          # prochain jour férié
+python3 couleur/couleur.py "#ff6600"                       # aperçu + rgb(255, 102, 0)
+python3 morse/morse.py code "sos"                          # ... --- ...
+python3 bases/bases.py 0xff                                # 255, 0b11111111, 0o377
+python3 chrono/chrono.py                                   # chrono avec tours
 ```
 
 ## 💶 `facture/` — Factures et devis
