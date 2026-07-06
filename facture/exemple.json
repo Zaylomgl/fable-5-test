@@ -1,0 +1,22 @@
+{
+  "numero": "2026-001",
+  "date": "06/07/2026",
+  "echeance": "30 jours",
+  "emetteur": {
+    "nom": "Théo Gyssens",
+    "adresse": "12 rue Exemple, 75000 Paris",
+    "email": "theogyssens2006@gmail.com",
+    "siret": "SIRET : 000 000 000 00000"
+  },
+  "client": {
+    "nom": "Client SARL",
+    "adresse": "34 avenue du Test, 69000 Lyon",
+    "email": "contact@client.fr"
+  },
+  "lignes": [
+    { "description": "Création de site vitrine (5 pages)", "quantite": 1, "prix_unitaire": 450.0 },
+    { "description": "Maintenance mensuelle", "quantite": 2, "prix_unitaire": 40.0 }
+  ],
+  "paiement": "Paiement par virement — IBAN : FR76 0000 0000 0000 0000 0000 000",
+  "mentions": "TVA non applicable, art. 293 B du CGI. Pénalités de retard : taux légal."
+}

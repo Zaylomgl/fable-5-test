@@ -1,0 +1,19 @@
+# Données personnelles générées par les outils — jamais versionnées
+budget/operations.csv
+veille-prix/produits.json
+veille-prix/historique.csv
+abonnements/abonnements.json
+partage/depenses.json
+partage/depenses-*.json
+rappels/rappels.json
+tempo/en_cours.json
+tempo/sessions.csv
+courses/liste.json
+habitudes/habitudes.json
+notes/notes.json
+facture/*.html
+facture/*.json
+!facture/exemple.json
+
+__pycache__/
+*.pyc
